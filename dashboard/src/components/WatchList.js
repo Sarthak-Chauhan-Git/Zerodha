@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+
+import GeneralContext from "../context/GeneralContext";
 
 import { Tooltip, Grow } from "@mui/material";
+
 import {
-  KeyboardArrowUp,
-  KeyboardArrowDown,
   BarChartOutlined,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
   MoreHoriz,
 } from "@mui/icons-material";
 
@@ -18,16 +21,16 @@ const WatchList = () => {
           type="text"
           name="search"
           id="search"
-          placeholder="Search eg: infy, bse, nifty fut weekly, gold mcx"
+          placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
           className="search"
         />
         <span className="counts"> {watchlist.length} / 50</span>
       </div>
 
       <ul className="list">
-        {watchlist.map((stock, index) => (
-          <WatchListItem stock={stock} key={index}></WatchListItem>
-        ))}
+        {watchlist.map((stock, index) => {
+          return <WatchListItem stock={stock} key={index} />;
+        })}
       </ul>
     </div>
   );
@@ -36,36 +39,42 @@ const WatchList = () => {
 export default WatchList;
 
 const WatchListItem = ({ stock }) => {
-  const [ShowWatchListIcons, setShowWatchListIcons] = useState(false);
+  const [showWatchlistActions, setShowWatchlistActions] = useState(false);
 
   const handleMouseEnter = (e) => {
-    setShowWatchListIcons(true);
+    setShowWatchlistActions(true);
   };
 
   const handleMouseLeave = (e) => {
-    setShowWatchListIcons(false);
+    setShowWatchlistActions(false);
   };
 
   return (
     <li onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <div className="item">
         <p className={stock.isDown ? "down" : "up"}>{stock.name}</p>
-        <div>
+        <div className="itemInfo">
           <span className="percent">{stock.percent}</span>
+          {stock.isDown ? (
+            <KeyboardArrowDown className="down" />
+          ) : (
+            <KeyboardArrowUp className="down" />
+          )}
+          <span className="price">{stock.price}</span>
         </div>
-        {stock.isDown ? (
-          <KeyboardArrowDown className="down"></KeyboardArrowDown>
-        ) : (
-          <KeyboardArrowUp className="up"></KeyboardArrowUp>
-        )}
-        <span className={stock.isDown ? "down" : "up"}>{stock.price}</span>
       </div>
-      {ShowWatchListIcons && <WatchListIcons uid={stock.name} />}
+      {showWatchlistActions && <WatchListActions uid={stock.name} />}
     </li>
   );
 };
 
-const WatchListIcons = ({ uid }) => {
+const WatchListActions = ({ uid }) => {
+  const generalContext = useContext(GeneralContext);
+
+  const handleBuyClick = () => {
+    generalContext.openBuyWindow(uid);
+  };
+
   return (
     <span className="actions">
       <span>
@@ -74,6 +83,7 @@ const WatchListIcons = ({ uid }) => {
           placement="top"
           arrow
           TransitionComponent={Grow}
+          onClick={handleBuyClick}
         >
           <button className="buy">Buy</button>
         </Tooltip>
@@ -92,12 +102,12 @@ const WatchListIcons = ({ uid }) => {
           TransitionComponent={Grow}
         >
           <button className="action">
-            <BarChartOutlined className="icon"></BarChartOutlined>
+            <BarChartOutlined className="icon" />
           </button>
         </Tooltip>
         <Tooltip title="More" placement="top" arrow TransitionComponent={Grow}>
           <button className="action">
-            <MoreHoriz className="icon"></MoreHoriz>
+            <MoreHoriz className="icon" />
           </button>
         </Tooltip>
       </span>
